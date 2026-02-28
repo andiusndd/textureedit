@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextureEdit | 3D Texture Generator</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="ph ph-cube-transparent"></i>
+            TEXTURE EDIT
+        </div>
+        <div class="header-actions">
+            <label class="action-item" for="imageUpload">
+                <i class="ph ph-upload"></i> UPLOAD
+            </label>
+            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+            <div class="action-item" id="exportBtn"><i class="ph ph-download-simple"></i> EXPORT ALL</div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Left: Workspace / Original Image -->
+        <div class="glass-card left-panel">
+            <div class="card-header">
+                <div class="card-title" id="workspaceTitle"><i class="ph ph-image"></i> WORKSPACE (ORIGINAL IMAGE)</div>
+            </div>
+            
+            <div class="viewport-area" id="viewportArea">
+                <div class="upload-placeholder" id="uploadPlaceholder" onclick="document.getElementById('imageUpload').click()">
+                    <i class="ph ph-upload-simple"></i>
+                    <h3>Drop an image to start</h3>
+                    <p style="margin-top: 8px; font-size: 13px; opacity: 0.7;">Supports JPG, PNG</p>
+                </div>
+                <!-- Original 2D Canvas Container -->
+                <img id="sourceImage" style="display: none; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px;" crossorigin="anonymous">
+            </div>
+
+            <div class="status-bar">
+                <div class="status-dot" id="engine-status-dot" style="background: red; box-shadow: 0 0 10px red;"></div>
+                <span id="engine-status">Loading OpenCV.js Engine...</span>
+            </div>
+        </div>
+
+        <!-- Right: PBR Maps Output -->
+        <div class="glass-card maps-panel">
+            <div class="card-header">
+                <div class="card-title"><i class="ph ph-stack"></i> ALBEDO (DELIGHTED) OUTPUT</div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls-panel" style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--glass-border);">
+                <div class="control-group" style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: var(--text-secondary);">
+                        <label for="blurSlider">BLUR RADIUS (LIGHT SPREAD)</label>
+                        <span id="blurValue">151</span>
+                    </div>
+                    <input type="range" id="blurSlider" min="11" max="501" step="10" value="151" style="width: 100%;">
+                </div>
+                <div class="control-group">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: var(--text-secondary);">
+                        <label for="intensitySlider">DELIGHT INTENSITY</label>
+                        <span id="intensityValue">1.0</span>
+                    </div>
+                    <input type="range" id="intensitySlider" min="0.1" max="2.0" step="0.1" value="1.0" style="width: 100%;">
+                </div>
+            </div>
+
+            <div class="maps-grid">
+                <!-- Albedo -->
+                <div class="map-item">
+                    <canvas id="canvasAlbedo" style="width: 100%; height: 100%; display: none;"></canvas>
+                    <i class="ph ph-image-square placeholder-icon"></i>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Logic Scripts -->
+    <script src="js/processor.js"></script>
+    <script src="js/main.js"></script>
+    
+    <!-- OpenCV js script (Async) -->
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onOpenCvReady()" type="text/javascript"></script>
+
+</body>
+</html>

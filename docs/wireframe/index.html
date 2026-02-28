@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TextureEdit | 3D Texture Generator</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+      :root {
+        --bg-color: #080c16;
+        --glass-bg: rgba(255, 255, 255, 0.08);
+        --glass-border: rgba(255, 255, 255, 0.15);
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --accent: #38bdf8;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        background-image:
+          radial-gradient(
+            circle at 15% 50%,
+            rgba(56, 189, 248, 0.05),
+            transparent 25%
+          ),
+          radial-gradient(
+            circle at 85% 30%,
+            rgba(168, 85, 247, 0.05),
+            transparent 25%
+          );
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* Top Header */
+      header {
+        height: 80px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 40px;
+        border-bottom: 1px solid var(--glass-border);
+        background: rgba(8, 12, 22, 0.5);
+        backdrop-filter: blur(20px);
+        z-index: 10;
+      }
+
+      .logo {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .logo i {
+        font-size: 24px;
+        color: var(--accent);
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+      }
+
+      .action-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+
+      .action-item:hover {
+        color: var(--text-primary);
+      }
+
+      .action-item i {
+        font-size: 20px;
+      }
+
+      /* Main Workspace */
+      main {
+        flex: 1;
+        padding: 40px;
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 32px;
+        height: calc(100vh - 80px);
+      }
+
+      /* Glass Cards */
+      .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+
+      .card-title {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Left Column - 3D / Original */
+      .viewport-area {
+        flex: 1;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-secondary);
+      }
+
+      .upload-placeholder {
+        text-align: center;
+        cursor: pointer;
+        padding: 40px;
+        border-radius: 12px;
+        transition: all 0.2s;
+      }
+
+      .upload-placeholder:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+      }
+
+      .upload-placeholder i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        color: var(--accent);
+      }
+
+      /* Right Column - Map Results */
+      .maps-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        flex: 1;
+      }
+
+      .map-item {
+        flex: 1;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .map-label {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 4px 10px;
+        border-radius: 4px;
+        backdrop-filter: blur(4px);
+      }
+
+      .map-action {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        transition: all 0.2s;
+      }
+
+      .map-action:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      /* Status Bar Bottom */
+      .status-bar {
+        position: absolute;
+        bottom: 32px;
+        left: 32px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <i class="ph ph-cube-transparent"></i>
+        TEXTURE EDIT
+      </div>
+      <div class="header-actions">
+        <div class="action-item"><i class="ph ph-upload"></i> UPLOAD</div>
+        <div class="action-item">
+          <i class="ph ph-download-simple"></i> EXPORT ALL
+        </div>
+        <div class="action-item"><i class="ph ph-sun"></i> LIGHT</div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Left: Workspace / 3D Preview -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="ph ph-bounding-box"></i> 3D WORKSPACE
+          </div>
+          <div class="action-item"><i class="ph ph-image"></i> VIEW 2D</div>
+        </div>
+
+        <div class="viewport-area">
+          <div class="upload-placeholder">
+            <i class="ph ph-upload-simple"></i>
+            <h3>Drop an image to start</h3>
+            <p style="margin-top: 8px; font-size: 13px; opacity: 0.7">
+              Supports JPG, PNG (Max 4K)
+            </p>
+          </div>
+        </div>
+
+        <div class="status-bar">
+          <div class="status-dot"></div>
+          Engine Ready [OpenCV.js Loaded]
+        </div>
+      </div>
+
+      <!-- Right: PBR Maps Output -->
+      <div class="glass-card" style="padding-bottom: 24px">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="ph ph-stack"></i> PBR MAPS GENERATED
+          </div>
+        </div>
+
+        <div class="maps-grid">
+          <!-- Albedo -->
+          <div class="map-item">
+            <div class="map-label">ALBEDO (DELIGHTED)</div>
+            <div class="map-action"><i class="ph ph-download-simple"></i></div>
+            <i
+              class="ph ph-image-square"
+              style="font-size: 32px; opacity: 0.2"
+            ></i>
+          </div>
+          <!-- Normal -->
+          <div class="map-item">
+            <div class="map-label">NORMAL MAP</div>
+            <div class="map-action"><i class="ph ph-download-simple"></i></div>
+            <i
+              class="ph ph-image-square"
+              style="font-size: 32px; opacity: 0.2"
+            ></i>
+          </div>
+          <!-- Roughness -->
+          <div class="map-item">
+            <div class="map-label">ROUGHNESS MAP</div>
+            <div class="map-action"><i class="ph ph-download-simple"></i></div>
+            <i
+              class="ph ph-image-square"
+              style="font-size: 32px; opacity: 0.2"
+            ></i>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
