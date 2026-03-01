@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TextureEdit | 3D Texture Generator</title>
+    <title>TextureEdit | PBR Texture Generator</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,79 +18,283 @@
 
     <header>
         <div class="logo">
-            <i class="ph ph-cube-transparent"></i>
-            TEXTURE EDIT
+            <i class="ph ph-cube-transparent"></i> TEXTURE EDIT
         </div>
-        <div class="header-actions">
-            <label class="action-item" for="imageUpload">
-                <i class="ph ph-upload"></i> UPLOAD
-            </label>
-            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
-            <div class="action-item" id="exportBtn"><i class="ph ph-download-simple"></i> EXPORT ALL</div>
-        </div>
+        
+        <nav class="header-nav" id="headerNav">
+            <a href="#cropView" class="nav-item"><i class="ph ph-crop"></i> 1. CROP</a>
+            <a href="#delightView" class="nav-item"><i class="ph ph-sun"></i> 2. DELIGHT</a>
+            <a href="#tilingView" class="nav-item"><i class="ph ph-grid-four"></i> 3. TILING</a>
+        </nav>
+
     </header>
 
-    <main>
-        <!-- Left: Workspace / Original Image -->
-        <div class="glass-card left-panel">
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 1 — PERSPECTIVE CROP & WARP
+    ═══════════════════════════════════════════════════════ -->
+    <section id="cropView" class="page-section">
+        <div class="section-label">STEP 1</div>
+        <div class="section-title">Perspective Crop &amp; Warp</div>
+        <div class="section-desc">Correct camera angle and perspective distortion. Drag the 4 corner points to define your texture area, then apply warp.</div>
+
+        <div class="glass-card" style="position: relative; min-height: 600px;">
             <div class="card-header">
-                <div class="card-title" id="workspaceTitle"><i class="ph ph-image"></i> WORKSPACE (ORIGINAL IMAGE)</div>
+                <div class="card-title"><i class="ph ph-crop"></i> PERSPECTIVE CROP</div>
+                <div class="header-actions">
+                    <button class="action-item" onclick="document.getElementById('imageUpload').click()" style="border: 1px solid var(--text-secondary); background: transparent;">
+                        <i class="ph ph-upload-simple"></i> UPLOAD
+                    </button>
+                    <button class="action-item" id="downloadCropBtn" style="border: 1px solid var(--accent); background: transparent; color: var(--accent); display: none;">
+                        <i class="ph ph-download-simple"></i> DOWNLOAD
+                    </button>
+                    <button class="action-item" id="applyWarpBtn" style="background: var(--accent); color: #000; font-weight: 700; border: none;">
+                        APPLY WARP <i class="ph ph-check-circle"></i>
+                    </button>
+                </div>
             </div>
             
-            <div class="viewport-area" id="viewportArea">
+            <div class="viewport-area" id="cropViewport" style="position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; border: none; border-radius: 12px;">
                 <div class="upload-placeholder" id="uploadPlaceholder" onclick="document.getElementById('imageUpload').click()">
                     <i class="ph ph-upload-simple"></i>
                     <h3>Drop an image to start</h3>
-                    <p style="margin-top: 8px; font-size: 13px; opacity: 0.7;">Supports JPG, PNG</p>
+                    <p style="margin-top: 8px; font-size: 13px; opacity: 0.7;">Supports JPG, PNG (Max 25MP)</p>
                 </div>
-                <!-- Original 2D Canvas Container -->
-                <img id="sourceImage" style="display: none; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px;" crossorigin="anonymous">
-            </div>
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
 
-            <div class="status-bar">
-                <div class="status-dot" id="engine-status-dot" style="background: red; box-shadow: 0 0 10px red;"></div>
-                <span id="engine-status">Loading OpenCV.js Engine...</span>
-            </div>
-        </div>
+                <div id="warpContainer" style="display: none; position: relative; margin: 0 auto; line-height: 0;">
+                    <canvas id="canvasCropPreview" style="box-shadow: 0 0 40px rgba(0,0,0,0.5);"></canvas>
+                    
+                    <svg id="warpLines" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 10;">
+                        <polygon id="warpPolygon" points="" fill="rgba(255,255,255,0.05)" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4" />
+                    </svg>
 
-        <!-- Right: PBR Maps Output -->
-        <div class="glass-card maps-panel">
-            <div class="card-header">
-                <div class="card-title"><i class="ph ph-stack"></i> ALBEDO (DELIGHTED) OUTPUT</div>
-            </div>
-
-            <!-- Controls -->
-            <div class="controls-panel" style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--glass-border);">
-                <div class="control-group" style="margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: var(--text-secondary);">
-                        <label for="blurSlider">BLUR RADIUS (LIGHT SPREAD)</label>
-                        <span id="blurValue">151</span>
-                    </div>
-                    <input type="range" id="blurSlider" min="11" max="501" step="10" value="151" style="width: 100%;">
-                </div>
-                <div class="control-group">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: var(--text-secondary);">
-                        <label for="intensitySlider">DELIGHT INTENSITY</label>
-                        <span id="intensityValue">1.0</span>
-                    </div>
-                    <input type="range" id="intensitySlider" min="0.1" max="2.0" step="0.1" value="1.0" style="width: 100%;">
-                </div>
-            </div>
-
-            <div class="maps-grid">
-                <!-- Albedo -->
-                <div class="map-item">
-                    <canvas id="canvasAlbedo" style="width: 100%; height: 100%; display: none;"></canvas>
-                    <i class="ph ph-image-square placeholder-icon"></i>
+                    <div class="warp-pt" id="ptTL"></div>
+                    <div class="warp-pt" id="ptTR"></div>
+                    <div class="warp-pt" id="ptBR"></div>
+                    <div class="warp-pt" id="ptBL"></div>
                 </div>
             </div>
         </div>
-    </main>
+
+        <!-- Next Step CTAs -->
+        <div class="next-step-bar">
+            <span class="next-step-hint">Done with crop?</span>
+            <a href="#delightView" class="btn-next-step">
+                Continue to Delight <i class="ph ph-arrow-right"></i>
+            </a>
+            <a href="#tilingView" class="btn-next-step btn-next-secondary" id="cropSkipToTilingBtn">
+                Skip to Tiling <i class="ph ph-arrow-bend-right-down"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 2 — DELIGHT
+    ═══════════════════════════════════════════════════════ -->
+    <section id="delightView" class="page-section">
+        <div class="section-label">STEP 2</div>
+        <div class="section-title">Delight — Flatten Lighting</div>
+        <div class="section-desc">Remove directional lighting and baked shadows to produce a clean flat Albedo map, optimally correcting uneven luminance gradients.</div>
+
+        <div class="two-col-layout">
+            <!-- Left: Source Image -->
+            <div class="glass-card left-panel" style="min-height: 560px;">
+                <div class="card-header">
+                    <div class="card-title" id="workspaceTitle"><i class="ph ph-image"></i> SOURCE IMAGE</div>
+                    <div class="header-actions">
+                        <button class="action-item" onclick="document.getElementById('delightImageUpload').click()" style="border: 1px solid var(--text-secondary); background: transparent;">
+                            <i class="ph ph-upload-simple"></i> UPLOAD
+                        </button>
+                        <button class="action-item" id="applyDelightBtn" style="background: var(--accent); color: #000; font-weight: 700; border: none;">
+                            PROCESS <i class="ph ph-waveform"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="viewport-area" id="viewportArea" style="flex: 1; min-height: 400px;">
+                    <input type="file" id="delightImageUpload" accept="image/*" style="display: none;">
+                    <div class="upload-placeholder" id="delightUploadPlaceholder" onclick="document.getElementById('delightImageUpload').click()">
+                        <i class="ph ph-upload-simple"></i>
+                        <h3>Drop an image to start</h3>
+                        <p style="margin-top: 8px; font-size: 13px; opacity: 0.7;">Supports JPG, PNG (Max 25MP)</p>
+                    </div>
+                    <img id="sourceImage" style="display: none; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px;" crossorigin="anonymous">
+                </div>
+
+                <div class="status-bar" style="position: relative; bottom: auto; left: auto; margin-top: 16px;">
+                    <div class="status-dot" id="engine-status-dot" style="background: red; box-shadow: 0 0 10px red;"></div>
+                    <span id="engine-status">Loading OpenCV.js Engine...</span>
+                </div>
+            </div>
+
+            <!-- Right: PBR Maps Output -->
+            <div class="glass-card maps-panel" style="min-height: 560px;">
+                <div class="card-header">
+                    <div class="card-title"><i class="ph ph-stack"></i> PBR MAPS OUTPUT</div>
+                </div>
+
+                <div class="controls-panel" style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--glass-border);">
+                    <!-- Delight Mode Selector -->
+                    <div style="margin-bottom: 16px;">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 1px; margin-bottom: 8px;">DELIGHT MODE</div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="mode-btn delight-mode-btn active" data-mode="v1" id="delightModeV1"
+                                style="padding: 6px 16px; border-radius: 4px; font-size: 11px; flex: 1;"
+                                title="For textures with subtle, gentle lighting gradients">
+                                <i class="ph ph-sun-dim"></i> DELIGHT 1 <span style="opacity:0.5; font-weight:400;">(soft)</span>
+                            </button>
+                            <button class="mode-btn delight-mode-btn" data-mode="v2" id="delightModeV2"
+                                style="padding: 6px 16px; border-radius: 4px; font-size: 11px; flex: 1;"
+                                title="For textures with strong lighting gradients or harsh directional light">
+                                <i class="ph ph-sun"></i> DELIGHT 2 <span style="opacity:0.5; font-weight:400;">(high contrast)</span>
+                            </button>
+                        </div>
+                        <div id="delightModeDesc" style="font-size: 10px; color: var(--text-secondary); margin-top: 6px; opacity: 0.6; line-height: 1.5;">
+                            Multi-scale frequency separation. Best for textures with small, even lighting differences.
+                        </div>
+                    </div>
+                    <div class="control-group" style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: var(--text-secondary);">
+                            <label for="blurSlider">BLUR RADIUS (LIGHT SCALE)</label>
+                            <span id="blurValue">151</span>
+                        </div>
+                        <input type="range" id="blurSlider" min="11" max="501" step="10" value="151" style="width: 100%;">
+                    </div>
+                    <div class="control-group">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: var(--text-secondary);">
+                            <label for="intensitySlider">DELIGHT STRENGTH (0 = soft, 1 = full)</label>
+                            <span id="intensityValue">1.0</span>
+                        </div>
+                        <input type="range" id="intensitySlider" min="0.1" max="2.0" step="0.1" value="1.0" style="width: 100%;">
+                    </div>
+                </div>
+
+                <div class="maps-grid" style="grid-template-columns: 1fr;">
+                    <!-- Albedo -->
+                    <div class="map-item">
+                        <div class="map-label" id="albedoMapLabel">ALBEDO · DELIGHT 1</div>
+                        <canvas id="canvasAlbedo" style="display: none;"></canvas>
+                        <i class="ph ph-image-square placeholder-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div id="saveAlbedoBtnWrap" style="margin-top: 16px; display: none;">
+                    <button id="saveAlbedoBtn" style="width: 100%; padding: 10px; background: var(--accent); border: none; border-radius: 4px; color: #000; font-weight: 700; font-size: 12px; cursor: pointer;">
+                        <i class="ph ph-download-simple"></i> SAVE ALBEDO
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Step CTAs -->
+        <div class="next-step-bar">
+            <span class="next-step-hint">Happy with the result?</span>
+            <a href="#tilingView" class="btn-next-step" id="delightToTilingBtn">
+                Continue to Tiling <i class="ph ph-arrow-right"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 3 — TILING
+    ═══════════════════════════════════════════════════════ -->
+    <section id="tilingView" class="page-section">
+        <div class="section-label">STEP 3</div>
+        <div class="section-title">Seamless Tiling</div>
+        <div class="section-desc">Generate a seamless repeating texture using Graph-Cut or Crossfade algorithms. Preview tiling in a 2×2 to 5×5 grid.</div>
+
+        <!-- Tiling Config Bar -->
+        <div class="glass-card" style="margin-bottom: 24px;">
+            <div class="card-header" style="justify-content: flex-start; gap: 24px; padding: 16px 24px; flex-wrap: wrap; row-gap: 12px;">
+                <div class="card-title" style="margin-right: 8px;"><i class="ph ph-gear"></i> TILING CONFIG</div>
+                <input type="file" id="tilingImageUpload" accept="image/*" style="display: none;">
+                <button class="action-item" onclick="document.getElementById('tilingImageUpload').click()" style="border: 1px solid var(--text-secondary); background: transparent; font-size: 11px; padding: 6px 16px;">
+                    <i class="ph ph-upload-simple"></i> UPLOAD
+                </button>
+                
+                <!-- Compact Controls -->
+                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                   <div style="display: flex; gap: 8px;">
+                        <button class="mode-btn active" id="modeRepeat" style="padding: 6px 16px; border-radius: 4px; font-size: 11px;">REPEAT</button>
+                        <button class="mode-btn" id="modeMirror" style="padding: 6px 16px; border-radius: 4px; font-size: 11px;">MIRROR</button>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="font-size: 11px; font-weight: 600; opacity: 0.7;">GRID</label>
+                        <select id="gridCount" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--glass-border); border-radius: 4px; font-size: 11px; padding: 4px 8px;">
+                            <option value="2">2x2</option>
+                            <option value="3" selected>3x3</option>
+                            <option value="4">4x4</option>
+                            <option value="5">5x5</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="showGridLines" style="accent-color: var(--accent);">
+                        <label for="showGridLines" style="font-size: 11px; font-weight: 600; opacity: 0.7; cursor: pointer;">GRID LINES</label>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="font-size: 11px; font-weight: 600; opacity: 0.7;">OVERLAP</label>
+                        <input type="range" id="overlapSlider" min="1" max="50" value="10" style="width: 80px;">
+                        <span id="overlapValue" style="font-size: 10px; min-width: 25px;">10%</span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <select id="seamlessMode" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--glass-border); border-radius: 4px; font-size: 11px; padding: 6px 8px;">
+                            <option value="crossfade">Crossfade (Basic)</option>
+                            <option value="graphcut" selected>Graph-Cut (High Quality)</option>
+                        </select>
+                        <button id="runAutoSeamlessBtn" style="padding: 6px 16px; background: var(--accent); border: none; border-radius: 4px; color: #000; font-weight: 700; font-size: 11px; cursor: pointer;">
+                            GENERATE
+                        </button>
+                    </div>
+
+                    <button id="runRotateBlendBtn" style="padding: 6px 16px; background: rgba(168, 85, 247, 0.7); border: 1px solid rgba(168, 85, 247, 0.8); border-radius: 4px; color: #fff; font-weight: 700; font-size: 11px; cursor: pointer;">
+                        ↻ ROTATE BLEND
+                    </button>
+                </div>
+
+                <button class="action-item" id="exportTilingBtn" style="margin-left: auto; font-size: 11px; border: 1px solid var(--accent); color: var(--accent); background: transparent; padding: 6px 16px;">
+                    <i class="ph ph-download-simple"></i> EXPORT
+                </button>
+            </div>
+        </div>
+
+        <!-- Large Preview Area -->
+        <div class="glass-card" style="padding: 0; overflow: hidden;">
+            <div class="viewport-area" id="tilingViewport" style="background: #000; min-height: 500px; overflow: hidden; cursor: grab; position: relative; display: block; user-select: none;">
+                <canvas id="canvasTiling" style="position: absolute; top: 0; left: 0; max-width: none; border-radius: 0; transform-origin: 0 0; will-change: transform;"></canvas>
+                <div id="tilingPlaceholder" style="text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none;">
+                    <i class="ph ph-grid-four" style="font-size: 48px; color: var(--accent); opacity: 0.5;"></i>
+                    <p style="margin-top: 16px; opacity: 0.7;">Upload a texture or process from Step 2</p>
+                </div>
+            </div>
+            <div class="tiling-toolbar">
+                <!-- Zoom Controls -->
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out (-)"><i class="ph ph-minus"></i></button>
+                    <span id="zoomDisplay" style="min-width: 42px; text-align: center; font-size: 11px; font-weight: 700; color: var(--accent);">100%</span>
+                    <button class="zoom-btn" id="zoomInBtn" title="Zoom In (+)"><i class="ph ph-plus"></i></button>
+                    <button class="zoom-btn zoom-btn-text" id="fitViewBtn" title="Fit to viewport (F)">FIT</button>
+                    <button class="zoom-btn zoom-btn-text" id="zoom100Btn" title="Actual size (1)">1:1</button>
+                    <button class="zoom-btn zoom-btn-text" id="centerBtn" title="Center canvas (C)"><i class="ph ph-crosshair-simple"></i></button>
+                </div>
+                <!-- Info -->
+                <span id="tilingInfo" style="font-size: 10px; color: var(--text-secondary); opacity: 0.7;"></span>
+                <!-- Hint -->
+                <span style="font-size: 10px; color: var(--text-secondary); opacity: 0.4; margin-left: auto;">
+                    <i class="ph ph-mouse-scroll"></i> Wheel zoom · Drag to pan · F = fit · C = center
+                </span>
+            </div>
+        </div>
+    </section>
 
     <!-- Custom Logic Scripts -->
     <script src="js/processor.js"></script>
     <script src="js/main.js"></script>
-    
+
     <!-- OpenCV js script (Async) -->
     <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onOpenCvReady()" type="text/javascript"></script>
 

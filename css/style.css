@@ -1,5 +1,5 @@
 :root {
-  --bg-color: #0f172a; /* Updated to a slightly nicer navy like Sklum */
+  --bg-color: #0f172a;
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --text-primary: #f8fafc;
@@ -14,62 +14,56 @@
   font-family: "Inter", sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--bg-color);
   background-image:
-    radial-gradient(
-      circle at 15% 50%,
-      rgba(56, 189, 248, 0.08),
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 85% 30%,
-      rgba(168, 85, 247, 0.08),
-      transparent 40%
-    );
+    radial-gradient(circle at 15% 30%, rgba(56, 189, 248, 0.07), transparent 40%),
+    radial-gradient(circle at 85% 60%, rgba(168, 85, 247, 0.07), transparent 40%);
   color: var(--text-primary);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* Top Header */
+/* ─── STICKY HEADER ─────────────────────────────────── */
 header {
-  height: 70px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 40px;
   border-bottom: 1px solid var(--glass-border);
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(16px);
-  z-index: 10;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
 }
 
 .logo {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 2px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 .logo i {
-  font-size: 24px;
+  font-size: 22px;
   color: var(--accent);
 }
 
-.header-actions {
+/* Nav — quick-jump anchors only */
+.header-nav {
   display: flex;
-  gap: 24px;
+  gap: 28px;
   align-items: center;
 }
-
-.action-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.header-nav .nav-item {
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 600;
@@ -77,26 +71,126 @@ header {
   text-transform: uppercase;
   cursor: pointer;
   transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.header-nav .nav-item:hover {
+  color: var(--accent);
 }
 
-.action-item:hover {
-  color: var(--text-primary);
+/* ─── PAGE SECTIONS (landing layout) ────────────────── */
+.page-section {
+  padding: 64px 40px 48px;
+  border-bottom: 1px solid var(--glass-border);
+  scroll-margin-top: 60px; /* offset for sticky header */
 }
-.action-item i {
-  font-size: 18px;
+.page-section:last-of-type {
+  border-bottom: none;
 }
 
-/* Main Workspace */
-main {
-  flex: 1;
-  padding: 32px;
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 10px;
+}
+.section-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+/* Two-column layout for Delight section */
+.two-col-layout {
   display: grid;
   grid-template-columns: 2fr 1.2fr;
-  gap: 32px;
-  height: calc(100vh - 70px);
+  gap: 24px;
 }
 
-/* Glass Cards */
+/* ─── NEXT STEP BAR ─────────────────────────────────── */
+.next-step-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+}
+.next-step-hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+.btn-next-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #000;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  cursor: pointer;
+  border: none;
+}
+.btn-next-step:hover { opacity: 0.85; }
+.btn-next-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
+}
+.btn-next-secondary:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+  opacity: 1;
+}
+
+/* ─── HEADER ACTIONS ─────────────────────────────────── */
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.action-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+}
+.action-item:hover { color: var(--text-primary); }
+.action-item i { font-size: 16px; }
+
+/* ─── GLASS CARDS ────────────────────────────────────── */
 .glass-card {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
@@ -117,9 +211,8 @@ main {
   align-items: center;
   margin-bottom: 20px;
 }
-
 .card-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 2px;
   color: var(--text-secondary);
@@ -128,13 +221,10 @@ main {
   align-items: center;
   gap: 8px;
 }
-.card-title i {
-  color: var(--text-primary);
-}
+.card-title i { color: var(--text-primary); }
 
-/* Left Column - 3D / Original */
+/* ─── VIEWPORT AREA ──────────────────────────────────── */
 .viewport-area {
-  flex: 1;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -144,8 +234,10 @@ main {
   align-items: center;
   position: relative;
   overflow: hidden;
+  min-height: 300px;
 }
 
+/* ─── UPLOAD PLACEHOLDER ─────────────────────────────── */
 .upload-placeholder {
   text-align: center;
   cursor: pointer;
@@ -153,25 +245,26 @@ main {
   transition: all 0.2s;
   z-index: 5;
 }
-.upload-placeholder:hover {
-  color: var(--text-primary);
-}
+.upload-placeholder:hover { color: var(--text-primary); }
 .upload-placeholder i {
   font-size: 48px;
   margin-bottom: 16px;
   color: var(--accent);
+  display: block;
 }
 
-/* Right Column - Map Results */
+/* ─── PBR MAPS GRID ──────────────────────────────────── */
 .maps-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
   flex: 1;
 }
-
+.maps-grid .map-item:first-child {
+  grid-column: span 2;
+  min-height: 320px;
+}
 .map-item {
-  flex: 1;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -180,54 +273,164 @@ main {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  min-height: 140px;
 }
-
 .map-label {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
+  bottom: 10px;
+  left: 10px;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 1px;
   background: rgba(0, 0, 0, 0.6);
-  padding: 4px 8px;
+  padding: 3px 7px;
   border-radius: 4px;
   backdrop-filter: blur(4px);
   z-index: 2;
 }
-
 .placeholder-icon {
   font-size: 32px;
   opacity: 0.2;
   z-index: 1;
 }
 
-#canvasAlbedo,
-#canvasNormal,
-#canvasRoughness {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  object-fit: contain;
+#canvasAlbedo {
+  max-width: 100%;
+  max-height: 340px;   /* cap height so it doesn't overflow the card */
+  width: auto;
+  height: auto;
+  display: block;
   z-index: 1;
-  border-radius: 12px; /* to fit inside parent */
+  border-radius: 8px;
 }
 
-/* Status Bar Bottom */
+/* ─── STATUS BAR ─────────────────────────────────────── */
 .status-bar {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 12px;
   color: var(--text-secondary);
 }
-
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ─── TILING VIEWPORT ────────────────────────────────── */
+#tilingViewport {
+  background-image:
+    linear-gradient(45deg, #111 25%, transparent 25%),
+    linear-gradient(-45deg, #111 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #111 75%),
+    linear-gradient(-45deg, transparent 75%, #111 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  cursor: grab;
+  display: block;        /* canvas is position:absolute inside */
+  overflow: hidden;      /* clip canvas that extends beyond viewport */
+  position: relative;    /* anchor for absolute canvas */
+  user-select: none;
+}
+#tilingViewport:active { cursor: grabbing; }
+
+#canvasTiling {
+  box-shadow: 0 0 50px rgba(0,0,0,0.5);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: pixelated;
+  display: block;
+  cursor: inherit;    /* inherits grab/grabbing from viewport */
+  max-width: none;
+  border-radius: 0;
+}
+
+/* ─── TILING MODE BUTTONS ────────────────────────────── */
+.mode-btn {
+  transition: all 0.2s ease;
+  opacity: 0.6;
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.mode-btn:hover { background: rgba(255,255,255,0.1) !important; opacity: 1; }
+.mode-btn.active {
+  background: var(--accent) !important;
+  color: #000 !important;
+  border-color: var(--accent) !important;
+  opacity: 1;
+  font-weight: 700;
+}
+
+/* ─── PERSPECTIVE WARP POINTS ────────────────────────── */
+.warp-pt {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  cursor: move;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  z-index: 100;
+  transition: scale 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.warp-pt:hover { scale: 1.3; background: #fff; border-color: var(--accent); }
+.warp-pt:active { scale: 1.1; }
+
+#warpLines {
+  filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+}
+
+/* ─── TILING TOOLBAR ─────────────────────────────────── */
+.tiling-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-top: 1px solid var(--glass-border);
+  backdrop-filter: blur(8px);
+  flex-wrap: wrap;
+}
+
+.zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+.zoom-btn:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.zoom-btn:active {
+  transform: scale(0.92);
+}
+.zoom-btn-text {
+  width: auto;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 900px) {
+  .two-col-layout { grid-template-columns: 1fr; }
+  .page-section { padding: 40px 20px 32px; }
+  header { padding: 0 20px; }
+  .header-nav { gap: 16px; }
 }
